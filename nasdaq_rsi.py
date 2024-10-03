@@ -5,66 +5,108 @@ from tvDatafeed import TvDatafeed, Interval
 from tradingview_screener import get_all_symbols
 import warnings
 import pandas_ta as ta
-import matplotlib.pyplot as plt
 
+# Suppress warnings to keep the output clean
 warnings.simplefilter(action='ignore')
 
 # Function to calculate RSI
 def calculate_rsi(data, length=14):
     """
     Calculate the Relative Strength Index (RSI) for the given data.
+
+    Parameters:
+    - data: DataFrame containing stock data with a 'close' price column.
+    - length: The period over which to calculate the RSI.
+
+    Returns:
+    - The DataFrame with an added 'RSI' column.
     """
+    # Use pandas_ta to calculate RSI
     data['RSI'] = ta.rsi(data['close'], length=length)
     return data
 
-# Initialize the data feed
+# Initialize the data feed from TradingView
 tv = TvDatafeed()
 
 # Define the list of stocks to analyze
-Hisseler = get_all_symbols(market='turkey')
-Hisseler = [symbol.replace('BIST:', '') for symbol in Hisseler]
-Hisseler = sorted(Hisseler)
+# Get all symbols from the American market
+symbols = get_all_symbols(market='america')
+
+# Remove the 'NASDAQ:' prefix from symbols (if present)
+symbols = [symbol.replace('NASDAQ:', '') for symbol in symbols]
+
+# Sort the list of symbols alphabetically
+symbols = sorted(symbols)
 
 # DataFrame to store signals
-Titles = ['Hisse Adı', 'Son Fiyat', 'RSI Buy Signal']
-df_signals = pd.DataFrame(columns=Titles)
+columns = ['Stock Name', 'Last Price', 'RSI Buy Signal']
+df_signals = pd.DataFrame(columns=columns)
 
-# Main loop to process each stock
-for hisse in Hisseler:
+# Main loop to process each stock symbol
+for symbol in symbols:
     try:
-        # Fetch historical data
-        data = tv.get_hist(symbol=hisse, exchange='BIST', interval=Interval.in_daily, n_bars=100)
+        # Fetch historical data for the stock symbol
+        data = tv.get_hist(
+            symbol=symbol,
+            exchange='NASDAQ',
+            interval=Interval.in_daily,
+            n_bars=100  # Fetch the last 100 daily data points
+        )
+        # Check if data is returned
+        if data is None or data.empty:
+            print(f"No data for {symbol}")
+            continue
+
+        # Reset index to make 'datetime' a column
         data = data.reset_index()
 
-        # Calculate RSI
+        # Calculate RSI and add it to the DataFrame
         data = calculate_rsi(data)
 
-        # Prepare the data
-        data.rename(columns={'open': 'Open', 'high': 'High', 'low': 'Low', 'close': 'Close', 'volume': 'Volume'}, inplace=True)
+        # Rename columns to standard format for consistency
+        data.rename(columns={
+            'open': 'Open',
+            'high': 'High',
+            'low': 'Low',
+            'close': 'Close',
+            'volume': 'Volume'
+        }, inplace=True)
+
+        # Set 'datetime' as the index
         data.set_index('datetime', inplace=True)
 
-        # Remove rows with NaN values in RSI
+        # Remove rows with NaN values in 'RSI' (usually the first few rows)
         data.dropna(subset=['RSI'], inplace=True)
 
-        # Extract the last two data points
+        # Ensure we have at least two data points after dropping NaNs
+        if len(data) < 2:
+            print(f"Not enough data for {symbol} after dropping NaNs")
+            continue
+
+        # Extract the last two data points to check for RSI crossing above 30
         Signals = data.tail(2).reset_index()
 
         # Define the buy signal logic for RSI
         # Signal when RSI crosses above 30 (from oversold territory)
-        Entry = (Signals.loc[0, 'RSI'] < 30) & (Signals.loc[1, 'RSI'] >= 30)
+        Entry = (Signals.loc[0, 'RSI'] < 30) and (Signals.loc[1, 'RSI'] >= 30)
+        Entry = bool(Entry)
 
-        # Get the last closing price
-        Last_Price = Signals.loc[1, 'Close']
+        # Get the last closing price and convert to float
+        Last_Price = float(Signals.loc[1, 'Close'])
 
         # Append the results to the DataFrame
-        L1 = [hisse, Last_Price, Entry]
-        df_signals.loc[len(df_signals)] = L1
-        print(L1)
+        row = [symbol, Last_Price, Entry]
+        df_signals.loc[len(df_signals)] = row
+
+        # Print the result for the current stock
+        print(row)
     except Exception as e:
-        print(f"Error processing {hisse}: {e}")
+        # If an error occurs, print it and continue with the next symbol
+        print(f"Error processing {symbol}: {e}")
         pass
 
 # Filter and display stocks with a buy signal
-df_True = df_signals[df_signals['RSI Buy Signal'] == True]
+df_true = df_signals[df_signals['RSI Buy Signal'] == True]
+
 print("\nStocks with RSI Buy Signal:")
-print(df_True)
+print(df_true)
