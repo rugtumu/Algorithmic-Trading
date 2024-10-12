@@ -53,8 +53,11 @@ for hisse in Hisseler:
         # Signal when RSI crosses above 30 (from oversold territory)
         Entry = (Signals.loc[0, 'RSI'] < 30) & (Signals.loc[1, 'RSI'] >= 30)
 
+        # Convert Entry to a native boolean
+        Entry = bool(Entry)
+
         # Get the last closing price
-        Last_Price = Signals.loc[1, 'Close']
+        Last_Price = float(Signals.loc[1, 'Close'])
 
         # Append the results to the DataFrame
         L1 = [hisse, Last_Price, Entry]
