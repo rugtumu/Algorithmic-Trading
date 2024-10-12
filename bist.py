@@ -105,7 +105,7 @@ for hisse in Hisseler:
             symbol=hisse,
             exchange='BIST',
             interval=Interval.in_daily,
-            n_bars=100  # Number of periods to fetch
+            n_bars=1000  # Number of periods to fetch
         )
         # Reset index to make 'datetime' a column
         data = data.reset_index()

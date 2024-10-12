@@ -50,7 +50,7 @@ for symbol in symbols:
             symbol=symbol,
             exchange='NASDAQ',
             interval=Interval.in_daily,
-            n_bars=100  # Fetch the last 100 daily data points
+            n_bars=1000  # Fetch the last 1000 daily data points
         )
         # Check if data is returned
         if data is None or data.empty:

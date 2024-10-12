@@ -46,7 +46,7 @@ df_signals = pd.DataFrame(columns=Titles)
 for hisse in Hisseler:
     try:
         # Fetch historical data
-        data = tv.get_hist(symbol=hisse, exchange='BIST', interval=Interval.in_daily, n_bars=100)
+        data = tv.get_hist(symbol=hisse, exchange='BIST', interval=Interval.in_daily, n_bars=1000)
         data = data.reset_index()
 
         # Customize RSI length and smoothing length for different timeframes

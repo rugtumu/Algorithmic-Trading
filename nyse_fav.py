@@ -55,7 +55,7 @@ df_signals = pd.DataFrame(columns=Titles)
 
 for hisse in Hisseler:
     try:
-        data = tv.get_hist(symbol=hisse, exchange='NYSE', interval=Interval.in_daily, n_bars=100)
+        data = tv.get_hist(symbol=hisse, exchange='NYSE', interval=Interval.in_daily, n_bars=1000)
         data = data.reset_index()
         Banker = Bankery(data)
         Banker.rename(columns={'open': 'Open', 'high': 'High', 'low': 'Low', 'close': 'Close', 'volume': 'Volume'}, inplace=True)

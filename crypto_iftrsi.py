@@ -1,4 +1,6 @@
-# This code scans for my favorite cryptocurrencies where Inverse Fisher Transform (IFT) on RSI is less than -0,5
+"""
+This code scans some cryptocurrencies where Inverse Fisher Transform (IFT) on RSI is less than -0,5.
+"""
 
 # Import required libraries
 import numpy as np
@@ -13,6 +15,10 @@ warnings.simplefilter(action='ignore')
 # Function to calculate RSI and apply Inverse Fisher Transform (IFT) on RSI with adjustable parameters
 def calculate_rsi_ift(data, rsi_length=5, smoothing_length=9):
     """
+    If you want to look for other intervals, then change the rsi_length. For example:
+    If you want to use interval=Interval.in_1_hour, then you should set rsi_length=13 
+    in order to prevent wrong signals.
+
     Calculate the RSI and apply the Inverse Fisher Transform (IFT) on RSI with adjustable RSI and smoothing lengths.
     """
     # Calculate RSI
@@ -33,14 +39,14 @@ def calculate_rsi_ift(data, rsi_length=5, smoothing_length=9):
 tv = TvDatafeed()
 
 # Define the list of cryptocurrencies to analyze
-# Use symbols from exchanges like BINANCE, COINBASE, or BITFINEX
+# Use symbols from BINANCE
 cryptos = ['BINANCE:BTCUSDT', 'BINANCE:ETHUSDT', 'BINANCE:LTCUSDT', 'BINANCE:SOLUSDT', 'BINANCE:BNBUSDT',
            'BINANCE:MANAUSDT', 'BINANCE:AVAXUSDT', 'BINANCE:SUIUSDT', 'BINANCE:FLOKIUSDT', 'BINANCE:IMXUSDT',
            'BINANCE:FTMUSDT', 'BINANCE:FLOWUSDT', 'BINANCE:BONKUSDT', 'BINANCE:PORTALUSDT', 'BINANCE:PYTHUSDT',
-           'BINANCE:ARBUSDT', 'BINANCE:XRPUSDT', 'COINBASE:CROUSDT', 'BINANCE:VETUSDT', 'GATEIO:ARBIUSDT',
+           'BINANCE:ARBUSDT', 'BINANCE:XRPUSDT', 'BINANCE:VETUSDT', 'BINANCE:APTUSDT', 'BINANCE:ALTUSDT',
            'BINANCE:RENDERUSDT', 'BINANCE:PEPEUSDT', 'BINANCE:FETUSDT', 'BINANCE:ICPUSDT', 'BINANCEUS:DAIUSDT',
            'BINANCE:NEARUSDT', 'BINANCE:DOTUSDT', 'BINANCE:ADAUSDT', 'BINANCE:DOGEUSDT', 'BINANCE:SXPUSDT',
-           'BINANCE:AXSUSDT', 'BINANCE:ROSEUSDT', 'BINANCE:ARKUSDT', 'BINANCE:APTUSDT', 'BINANCE:ALTUSDT']
+           'BINANCE:AXSUSDT', 'BINANCE:ROSEUSDT', 'BINANCE:ARKUSDT', 'BINANCE:ETHFIUSDT']
 
 # DataFrame to store signals
 Titles = ['Crypto Symbol', 'Last Price', 'IFT Buy Signal']
@@ -50,7 +56,7 @@ df_signals = pd.DataFrame(columns=Titles)
 for crypto in cryptos:
     try:
         # Fetch historical data
-        data = tv.get_hist(symbol=crypto, exchange='BINANCE', interval=Interval.in_daily, n_bars=100)
+        data = tv.get_hist(symbol=crypto, exchange='BINANCE', interval=Interval.in_daily, n_bars=1000)
         data = data.reset_index()
 
         # Customize RSI length and smoothing length for different timeframes
