@@ -32,8 +32,8 @@ tv = TvDatafeed()  # For guest mode
 Hisseler = ['NASDAQ:NVDA', 'NASDAQ:AMZN', 'NASDAQ:MSFT', 'NASDAQ:AMD', 'NASDAQ:MRVL',
             'NASDAQ:UAL', 'NASDAQ:COIN', 'NASDAQ:HEPS', 'NASDAQ:RIOT', 'NASDAQ:INTU',
             'NASDAQ:PANW', 'NASDAQ:MELI', 'NASDAQ:MDLZ', 'NASDAQ:SNPS', 'NASDAQ:META',
-            'NASDAQ:CRWD', 'NASDAQ:GOOGL', 'NASDAQ:MU']
-Hisseler = [symbol.replace('NASDAQ:', '') for symbol in Hisseler if symbol.startswith('NASDAQ:')]
+            'NASDAQ:CRWD', 'NASDAQ:GOOGL', 'NASDAQ:MU', 'AMEX:UNG']
+#Hisseler = [symbol.replace('NASDAQ:', '') for symbol in Hisseler if symbol.startswith('NASDAQ:')]
 Hisseler = sorted(Hisseler)
 
 # DataFrame to store signals
