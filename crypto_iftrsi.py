@@ -16,7 +16,7 @@ warnings.simplefilter(action='ignore')
 def calculate_rsi_ift(data, rsi_length=5, smoothing_length=9):
     """
     If you want to look for other intervals, then change the rsi_length. For example:
-    If you want to use interval=Interval.in_1_hour, then you should set rsi_length=13 
+    If you want to use interval=Interval.in_1_hour, then you may set rsi_length=13
     in order to prevent wrong signals.
 
     Calculate the RSI and apply the Inverse Fisher Transform (IFT) on RSI with adjustable RSI and smoothing lengths.
@@ -44,12 +44,12 @@ cryptos = ['BINANCE:BTCUSDT', 'BINANCE:ETHUSDT', 'BINANCE:LTCUSDT', 'BINANCE:SOL
            'BINANCE:MANAUSDT', 'BINANCE:AVAXUSDT', 'BINANCE:SUIUSDT', 'BINANCE:FLOKIUSDT', 'BINANCE:IMXUSDT',
            'BINANCE:FTMUSDT', 'BINANCE:FLOWUSDT', 'BINANCE:BONKUSDT', 'BINANCE:PORTALUSDT', 'BINANCE:PYTHUSDT',
            'BINANCE:ARBUSDT', 'BINANCE:XRPUSDT', 'BINANCE:VETUSDT', 'BINANCE:APTUSDT', 'BINANCE:ALTUSDT',
-           'BINANCE:RENDERUSDT', 'BINANCE:PEPEUSDT', 'BINANCE:FETUSDT', 'BINANCE:ICPUSDT', 'BINANCEUS:DAIUSDT',
+           'BINANCE:RENDERUSDT', 'BINANCE:PEPEUSDT', 'BINANCE:FETUSDT', 'BINANCE:ICPUSDT', 'BINANCE:ETHFIUSDT'
            'BINANCE:NEARUSDT', 'BINANCE:DOTUSDT', 'BINANCE:ADAUSDT', 'BINANCE:DOGEUSDT', 'BINANCE:SXPUSDT',
-           'BINANCE:AXSUSDT', 'BINANCE:ROSEUSDT', 'BINANCE:ARKUSDT', 'BINANCE:ETHFIUSDT']
+           'BINANCE:AXSUSDT', 'BINANCE:ROSEUSDT', 'BINANCE:ARKUSDT']
 
 # DataFrame to store signals
-Titles = ['Crypto Symbol', 'Last Price', 'IFT Buy Signal']
+Titles = ['Crypto Symbol', 'Last Price', 'IFT Signal']
 df_signals = pd.DataFrame(columns=Titles)
 
 # Main loop to process each cryptocurrency
@@ -89,7 +89,7 @@ for crypto in cryptos:
         pass
 
 # Filter and display cryptocurrencies with a buy signal
-df_True = df_signals[df_signals['IFT Buy Signal'] == True]
+df_True = df_signals[df_signals['IFT Signal'] == True]
 
 # Ensure all rows are shown in the output
 pd.set_option('display.max_rows', None)
