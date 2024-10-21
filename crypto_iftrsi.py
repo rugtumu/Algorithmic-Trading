@@ -1,5 +1,5 @@
 """
-This code scans some cryptocurrencies where Inverse Fisher Transform (IFT) on RSI is less than -0,5.
+This code scans cryptocurrencies where Inverse Fisher Transform (IFT) on RSI is <= -0.5
 """
 
 # Import required libraries
@@ -15,23 +15,19 @@ warnings.simplefilter(action='ignore')
 # Function to calculate RSI and apply Inverse Fisher Transform (IFT) on RSI with adjustable parameters
 def calculate_rsi_ift(data, rsi_length=5, smoothing_length=9):
     """
-    If you want to look for other intervals, then change the rsi_length. For example:
-    If you want to use interval=Interval.in_1_hour, then you may set rsi_length=13
-    in order to prevent wrong signals.
-
     Calculate the RSI and apply the Inverse Fisher Transform (IFT) on RSI with adjustable RSI and smoothing lengths.
     """
     # Calculate RSI
     data['RSI'] = ta.rsi(data['close'], length=rsi_length)
     
-    # Normalize RSI to the range [-1, 1] for IFT
-    normalized_rsi = 2 * (data['RSI'] - 50) / 100
+    # Normalize RSI
+    v1 = 0.1 * (data['RSI'] - 50)
     
-    # Smooth the normalized RSI with a simple moving average (SMA)
-    smoothed_rsi = ta.sma(normalized_rsi, length=smoothing_length)
+    # Smooth v1 using an Exponential Moving Average (EMA)
+    v2 = ta.ema(v1, length=smoothing_length)
     
     # Apply the Inverse Fisher Transform
-    data['IFT_RSI'] = np.tanh(smoothed_rsi)
+    data['IFT_RSI'] = (np.exp(2 * v2) - 1) / (np.exp(2 * v2) + 1)
     
     return data
 
@@ -39,17 +35,26 @@ def calculate_rsi_ift(data, rsi_length=5, smoothing_length=9):
 tv = TvDatafeed()
 
 # Define the list of cryptocurrencies to analyze
-# Use symbols from BINANCE
-cryptos = ['BINANCE:BTCUSDT','BINANCE:ETHUSDT','BINANCE:LTCUSDT','BINANCE:SOLUSDT','BINANCE:BNBUSDT',
-           'BINANCE:MANAUSDT','BINANCE:AVAXUSDT','BINANCE:SUIUSDT','BINANCE:FLOKIUSDT','BINANCE:IMXUSDT',
-           'BINANCE:FTMUSDT','BINANCE:FLOWUSDT','BINANCE:BONKUSDT','BINANCE:PORTALUSDT','BINANCE:PYTHUSDT',
-           'BINANCE:ARBUSDT','BINANCE:XRPUSDT','BINANCE:VETUSDT','BINANCE:RENDERUSDT','BINANCE:PEPEUSDT',
-           'BINANCE:FETUSDT','BINANCE:ICPUSDT','BINANCE:NEARUSDT','BINANCE:DOTUSDT','BINANCE:ADAUSDT',
-           'BINANCE:DOGEUSDT','BINANCE:SXPUSDT','BINANCE:AXSUSDT','BINANCE:ROSEUSDT','BINANCE:ARKUSDT',
-           'BINANCE:APTUSDT','BINANCE:ALTUSDT','BINANCE:ETHFIUSDT','BINANCE:TRXUSDT','BINANCE:SHIBUSDT',
-           'BINANCE:LINKUSDT','BINANCE:BCHUSDT','BINANCE:UNIUSDT','BINANCE:TAOUSDT','BINANCE:ETCUSDT',
-           'BINANCE:WIFUSDT','BINANCE:OPUSDT','BINANCE:FILUSDT','BINANCE:INJUSDT','BINANCE:ATOMUSDT',
-           'BINANCE:SEIUSDT','BINANCE:RUNEUSDT']
+cryptos = ['BINANCE:BTCUSDT','BINANCE:ETHUSDT','BINANCE:LTCUSDT',
+            'BINANCE:SOLUSDT','BINANCE:BNBUSDT','BINANCE:TAOUSDT',
+            'BINANCE:MANAUSDT','GATEIO:GOATUSDT','BINANCE:AVAXUSDT',
+            'BINANCE:SUIUSDT','BINANCE:IMXUSDT','BINANCE:FTMUSDT',
+            'BINANCE:FLOWUSDT','BINANCE:FLOKIUSDT','BINANCE:BONKUSDT',
+            'BINANCE:PORTALUSDT','BINANCE:PEPEUSDT','BINANCE:SHIBUSDT',
+            'BINANCE:DOGEUSDT','BINANCE:RENDERUSDT','BINANCE:PYTHUSDT',
+            'BINANCE:ARBUSDT','BINANCE:VETUSDT','BINANCE:ETHFIUSDT',
+            'BINANCE:XRPUSDT','BINANCE:FETUSDT','BINANCE:ICPUSDT',
+            'BINANCE:NEARUSDT','BINANCE:DOTUSDT','BINANCE:ADAUSDT',
+            'BINANCE:SXPUSDT','BINANCE:AXSUSDT','BINANCE:ROSEUSDT',
+            'BINANCE:ARKUSDT','BINANCE:APTUSDT','BINANCE:ALTUSDT',
+            'BINANCE:TRXUSDT','BINANCE:LINKUSDT','BINANCE:BCHUSDT',
+            'BINANCE:UNIUSDT','BINANCE:ETCUSDT','BINANCE:WIFUSDT',
+            'BINANCE:OPUSDT','BINANCE:FILUSDT','BINANCE:ATOMUSDT',
+            'BINANCE:SEIUSDT','BINANCE:RUNEUSDT','BINANCE:RAYUSDT',
+            'BINANCE:GRTUSDT','BINANCE:INJUSDT','BINANCE:ORDIUSDT',
+            'GATEIO:POPCATUSDT','BINANCE:PENDLEUSDT','BINANCE:ARKMUSDT',
+            'BINANCE:CYBERUSDT','BINANCE:EDUUSDT','BINANCE:RDNTUSDT',
+            'BINANCE:IDUSDT','BINANCE:WLDUSDT','BINANCE:PIXELUSDT','BINANCE:JUPUSDT']
 
 # DataFrame to store signals
 Titles = ['Crypto Symbol', 'Last Price', 'IFT Signal']
@@ -63,8 +68,6 @@ for crypto in cryptos:
         data = data.reset_index()
 
         # Customize RSI length and smoothing length for different timeframes
-        # For daily charts, use RSI length = 5 and smoothing length = 9
-        # For hourly chars, use RSI length = 13 and smoothing length = 9
         data = calculate_rsi_ift(data, rsi_length=5, smoothing_length=9)
 
         # Prepare the data
@@ -77,12 +80,9 @@ for crypto in cryptos:
         # Extract the last data point
         Signals = data.tail(1).reset_index()
 
-        # Define the buy signal logic based on IFT of RSI being less than -0.5
+        # Define the signal logic based on IFT of RSI being between -0.5 and +0.5
         IFT_RSI_value = Signals.loc[0, 'IFT_RSI']
-        # Entry = (IFT_RSI_value < -0.5)
-
-        # If you want to look for the values in [-0.5, 0.5] then use the following code line
-        Entry = (-0.5 <= IFT_RSI_value <= 0.5)
+        Entry = IFT_RSI_value <= -0.5
         Entry = bool(Entry)  # Convert to boolean
 
         # Get the last closing price and convert to float
@@ -96,11 +96,11 @@ for crypto in cryptos:
         print(f"Error processing {crypto}: {e}")
         pass
 
-# Filter and display cryptocurrencies with a buy signal
+# Filter and display cryptocurrencies with the signal
 df_True = df_signals[df_signals['IFT Signal'] == True]
 
 # Ensure all rows are shown in the output
 pd.set_option('display.max_rows', None)
 
-print("\nCryptocurrencies with IFT RSI below -0.5:")
+print("\nCryptocurrencies with IFT RSI between -0.5 and +0.5:")
 print(df_True)
