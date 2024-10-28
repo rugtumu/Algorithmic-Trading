@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 import time
 
-# Hidden markov model 
+# Hidden Markov Model for training
 
 print("Starting Bitcoin HMM analysis...")
 
