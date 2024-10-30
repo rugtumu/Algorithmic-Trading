@@ -18,7 +18,7 @@ def load_and_preprocess_data(file_path):
 
     # Parse 'Start' as datetime and set as index
     print("Creating datetime index...")
-    df.index = pd.date_range(start='2018-01-28', periods=len(df), freq='h')
+    #df.index = pd.date_range(start='2022-04-01', periods=len(df), freq='h')
 
     print("Calculating returns and volatility...")
     df['Returns'] = df['Close'].pct_change()
@@ -26,6 +26,10 @@ def load_and_preprocess_data(file_path):
 
     print("Calculating volume change...")
     df['Volume_Change'] = df['Volume'].pct_change()
+
+    # Check for and replace inf values
+    print("Handling infinite values...")
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
 
     print("Dropping NaN values...")
     df.dropna(inplace=True)
@@ -104,7 +108,7 @@ def plot_results(data, states):
 
 # Main execution
 print("Starting main execution...")
-file_path = '/home/umut/trade/data/modified_bitcoin_data_hourly.csv'
+file_path = '/home/umut/trade/data/modified_bitcoin_data_hourly_1.csv'
 data = load_and_preprocess_data(file_path)
 
 # Passing in the above data to a training HMM model
