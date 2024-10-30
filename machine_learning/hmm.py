@@ -13,19 +13,12 @@ print("Starting Bitcoin HMM analysis...")
 def load_and_preprocess_data(file_path):
     print(f"Loading data from {file_path}...")
 
-    # Read CSV with custom column names, no header
+    # Read CSV and reverse the DataFrame to chronological order
     df = pd.read_csv(file_path)
 
-    # Drop two columns
-    df.drop(['End', 'Market Cap'], axis=1, inplace=True)
-
-    print(df.columns)
-
+    # Parse 'Start' as datetime and set as index
     print("Creating datetime index...")
-    df.index = pd.date_range(start='2018-01-01', periods=len(df), freq='h')
-
-    # Rename the columns
-    df.columns = ['Datetime','Open', 'High', 'Low', 'Close', 'Volume']
+    df.index = pd.date_range(start='2018-01-28', periods=len(df), freq='h')
 
     print("Calculating returns and volatility...")
     df['Returns'] = df['Close'].pct_change()
@@ -63,8 +56,8 @@ def predict_states(model, data, scaler):
     features=['Returns', 'Volatility', 'Volume_Change']
 
     X = data[features].values
-    X_scaled = scaler.fit_transform(X)
-    states=model.predict(X_scaled)
+    X_scaled = scaler.transform(X)
+    states = model.predict(X_scaled)
 
     print(f"States predicted. Unique states: {np.unique(states)}")
     return states
@@ -95,9 +88,6 @@ def plot_results(data, states):
 
     for state in range(model.n_components):
         mask = (states == state)
-        if len(mask) != len(data.index):
-            print(f"Mismatch found for state {state}: Length of mask is {len(mask)}")
-
         ax1.fill_between(data.index, data['Close'].min(), data['Close'].max(),
                          where=mask, alpha=0.3, label=f'State {state}')
     
@@ -114,8 +104,7 @@ def plot_results(data, states):
 
 # Main execution
 print("Starting main execution...")
-
-file_path = '/home/umut/trade/data/bitcoin_2018-01-28_2024-10-28.csv'
+file_path = '/home/umut/trade/data/modified_bitcoin_data_hourly.csv'
 data = load_and_preprocess_data(file_path)
 
 # Passing in the above data to a training HMM model
@@ -124,6 +113,7 @@ model, scaler = train_hmm(data)
 
 print("Predicting states...")
 states = predict_states(model, data, scaler)
+time.sleep(124781)
 
 print("Analyzing states...")
 analyzes_states(data, states)
