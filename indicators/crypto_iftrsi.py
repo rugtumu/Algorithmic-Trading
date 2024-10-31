@@ -106,5 +106,5 @@ df_True = df_signals[df_signals['IFT Signal'] == True]
 # Ensure all rows are shown in the output
 pd.set_option('display.max_rows', None)
 
-print("\nCryptocurrencies with IFT RSI between -0.5 and +0.5:")
+print("\nCryptocurrencies with IFT RSI less than -0.5:")
 print(df_True)
